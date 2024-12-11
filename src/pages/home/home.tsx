@@ -1,7 +1,6 @@
 import {Component} from 'react'
 import './home.scss'
 import { homeProps } from './home.types'
-import {Button} from "react-bootstrap";
 import {Link} from "react-router-dom";
 
 export default class Home extends Component<homeProps> {

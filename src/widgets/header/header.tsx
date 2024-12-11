@@ -11,9 +11,9 @@ class Header extends Component {
         <Container>
           <Navbar.Brand as={Link} to="/">GridApp</Navbar.Brand>
           <Nav className="me-auto">
-            <Nav.Link as={Link} to="/grid">Grid</Nav.Link>
-            <Nav.Link as={Link} to="/form">Form</Nav.Link>
-            <Nav.Link as={Link} to="/user">User</Nav.Link>
+            <Nav.Link as={Link} to="/usersGrid">Users</Nav.Link>
+            <Nav.Link as={Link} to="/ordersGrid">Orders</Nav.Link>
+            <Nav.Link as={Link} to="/productsGrid">Products</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
