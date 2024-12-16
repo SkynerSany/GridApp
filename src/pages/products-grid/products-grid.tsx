@@ -24,9 +24,9 @@ class ProductsGrid extends Component<{}, IProductsGridState> {
   ];
 
   componentDidMount() {
-    fetch('/data.json')
+    fetch('http://localhost:5000/api/products')
       .then(response => response.json())
-      .then(data => this.setState({ rowData: data.products }))
+      .then(products => this.setState({ rowData: products }))
       .catch(error => console.error('Ошибка при загрузке данных:', error));
   }
 

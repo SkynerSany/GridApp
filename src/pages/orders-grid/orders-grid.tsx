@@ -49,9 +49,9 @@ class OrdersGrid extends Component<{}, IOrdersGridState> {
   }
 
   componentDidMount() {
-    fetch('/data.json')
+    fetch('http://localhost:5000/api/orders')
       .then(response => response.json())
-      .then(data => this.setState({ rowData: data.orders }))
+      .then(orders => this.setState({ rowData: orders }))
       .catch(error => console.error('Ошибка при загрузке данных:', error));
   }
 
