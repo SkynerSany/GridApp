@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
 
 // Добавить нового пользователя
 router.post('/', async (req, res) => {
-    const prevUser = await User.findByIdAndUpdate(req.params.id);
+    const prevUser = await User.findOneAndUpdate({ productId: req.params.id });
     if (prevUser) res.status(400).json({ message: "Пользователь уже существует" });
 
     const user = new User(req.body);
@@ -30,9 +30,10 @@ router.post('/', async (req, res) => {
 // Изменить пользователя
 router.put('/:id', async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const user = await User.findOneAndUpdate({id: req.params.id}, req.body, { new: true });
         if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
-        res.json(user);
+        const users = await User.find();
+        res.json(users);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }

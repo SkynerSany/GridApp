@@ -1,4 +1,4 @@
-interface IProductsGridRowData {
+export interface IProductsGridRowData {
   productId: string;
   name: string;
   category: string;

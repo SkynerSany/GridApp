@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
 // Получить продукт по ID
 router.get('/:id', async (req, res) => {
     try {
-        const product = await Product.findOne({ productId: req.params.id });
+        const product = await Product.findOne({ productId: `${req.params.id}` });
         if (!product) return res.status(404).send('Product not found');
         res.json(product);
     } catch (error) {
