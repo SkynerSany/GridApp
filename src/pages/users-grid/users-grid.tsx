@@ -1,14 +1,57 @@
-import {Component} from 'react';
+import {Component, memo} from 'react';
 import {AgGridReact} from 'ag-grid-react';
 import {ColDef, GetRowIdParams} from 'ag-grid-community';
-import {IUsersGridState} from "./users-grid.types";
+import {IUsersGridMemo, IUsersGridRowData, IUsersGridState} from "./users-grid.types";
 import {Button} from "react-bootstrap";
+import ModalCustom from "../../widgets/modal/modal";
+
+function editUser(userData: IUsersGridRowData, updateRowData: (rowData: IUsersGridRowData[]) => void) {
+  fetch(`http://localhost:5000/api/users/${userData?.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData)
+  })
+    .then(response => response.json())
+    .then(rowData => updateRowData(rowData))
+    .catch(error => console.log(error));
+}
+
+function addNewUser(userData: IUsersGridRowData, updateRowData: (rowData: IUsersGridRowData[]) => void) {
+  fetch(`http://localhost:5000/api/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData)
+  })
+    .then(response => response.json())
+    .then(rowData => updateRowData(rowData))
+    .catch(error => console.log(error));
+}
+
+const GridMemo = memo(({columnDefs, rowData, btnEditActive}: IUsersGridMemo) => {
+  return <AgGridReact
+    columnDefs={columnDefs}
+    rowData={rowData}
+    pagination={true}
+    paginationPageSize={20}
+    getRowId={(params: GetRowIdParams) => params.data.id}
+    rowSelection={'single'}
+    onRowSelected={(event) => btnEditActive(true, event.api.getSelectedRows()[0])}
+  />
+})
 
 class UsersGrid extends Component<{}, IUsersGridState> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      rowData: null,
+      rowData: [],
+      btnEditIsActive: false,
+      showModal: false,
+      selectedRowData: null,
+      modalType: 'user'
     };
   }
 
@@ -22,7 +65,14 @@ class UsersGrid extends Component<{}, IUsersGridState> {
     {field: "profileAddressCity", headerName: "City", sortable: true, filter: true, flex: 2},
     {field: "profileAddressZipcode", headerName: "Zipcode", sortable: true, filter: true, flex: 1},
     {field: "profilePreferencesTheme", headerName: "Theme", sortable: true, filter: true, flex: 1},
-    {field: "profilePreferencesNotifications", headerName: "Notifications", sortable: true, filter: true, type: "booleanColumn", editable: true, flex: 1},
+    {
+      field: "profilePreferencesNotifications",
+      headerName: "Notifications",
+      sortable: true,
+      filter: true,
+      type: "booleanColumn",
+      flex: 1
+    },
   ];
 
   componentDidMount() {
@@ -32,81 +82,43 @@ class UsersGrid extends Component<{}, IUsersGridState> {
       .catch(error => console.error('Ошибка при загрузке данных:', error));
   }
 
-  addNewUser() {
-    const id = prompt('Enter user id');
-    if (id === '') return;
-
-    fetch(`http://localhost:5000/api/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        "id": id,
-        "name": "Whitney Green",
-        "email": "tmorgan@gomez-gonzales.com",
-        "role": "Moderator",
-        "profileAge": 40,
-        "profileAddressStreet": "03324 Heather Route",
-        "profileAddressCity": "Johnfurt",
-        "profileAddressZipcode": "89209",
-        "profilePreferencesTheme": "light",
-        "profilePreferencesNotifications": true
-      })
-    })
-      .then(response => response.json())
-      .then(users => Array.isArray(users) ? this.setState({rowData: users}) : console.log(users))
-      .catch(error => console.log(error));
+  btnEditActive(isActive: boolean, selectedRowData: IUsersGridRowData) {
+    this.setState({btnEditIsActive: isActive, selectedRowData: selectedRowData});
   }
 
-  editUser() {
-    const id = prompt('Enter user id');
-    if (id === '') return;
+  updateUserData(userData: IUsersGridRowData) {
+    switch (this.state.modalType) {
+      case 'user': editUser(userData, (rowData) => this.setState({rowData: rowData})); break;
+      case "emptyUser": addNewUser(userData, (rowData) => this.setState({rowData: rowData})); break;
+    }
 
-    fetch(`http://localhost:5000/api/users/${ id }`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        "id": id,
-        "name": "Whitney Grefg",
-        "email": "tmorgan@gomez-gonzales.com",
-        "role": "Moderator",
-        "profileAge": 40,
-        "profileAddressStreet": "03324 Heather Route",
-        "profileAddressCity": "Johnfurt",
-        "profileAddressZipcode": "89209",
-        "profilePreferencesTheme": "light",
-        "profilePreferencesNotifications": true
-      })
-    })
-      .then(response => response.json())
-      .then(users => Array.isArray(users) ? this.setState({rowData: users}) : console.log(users))
-      .catch(error => console.log(error));
+    this.setState({showModal: false})
   }
-
-  getRowId = (params: GetRowIdParams)=> params.data.id
 
   render() {
+
     return (
       <>
         <div className="ag-theme-alpine" style={{height: '80%', width: '100%'}}>
           {
-            this.state.rowData ? (
-              <AgGridReact
-                columnDefs={this.columnDefs}
-                rowData={this.state.rowData}
-                pagination={true}
-                paginationPageSize={20}
-                getRowId={this.getRowId}
-              />
-            ) : (
+            this.state.rowData ?
+              <GridMemo columnDefs={this.columnDefs} rowData={this.state.rowData} btnEditActive={this.btnEditActive.bind(this)}/> :
               <div>Загрузка данных...</div>
-            )}
+          }
         </div>
-        <Button onClick={() => this.addNewUser()} className="my-2 mx-3">Add new user</Button>
-        <Button onClick={() => this.editUser()}>Edit user</Button>
+        <Button onClick={() => this.setState({showModal: true, modalType: 'emptyUser'})} className="my-2 mx-3">Add new user</Button>
+        <Button
+          onClick={() => this.setState({showModal: true, modalType: 'user'})}
+          active={this.state.btnEditIsActive}
+        >Edit user</Button>
+
+        <ModalCustom
+          show={this.state.showModal}
+          handleClose={() => this.setState({showModal: false})}
+          rowData={[this.state.selectedRowData as IUsersGridRowData]}
+          updateUserData={this.updateUserData.bind(this)}
+          type={this.state.modalType}
+        />
       </>
     );
   }

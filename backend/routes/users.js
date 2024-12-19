@@ -14,14 +14,14 @@ router.get('/', async (req, res) => {
 
 // Добавить нового пользователя
 router.post('/', async (req, res) => {
-    const prevUser = await User.findOneAndUpdate({ productId: req.params.id });
+    const prevUser = await User.findOne({ id: req.body.id });
     if (prevUser) res.status(400).json({ message: "Пользователь уже существует" });
-
     const user = new User(req.body);
+
     try {
         await user.save();
         const users = await User.find();
-        res.status(201).json(users);
+        res.json(users);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }

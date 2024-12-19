@@ -1,4 +1,6 @@
-interface IUsersGridRowData {
+import {ColDef} from "ag-grid-community";
+
+export interface IUsersGridRowData {
   id: number;
   name: string;
   age: number;
@@ -10,5 +12,15 @@ interface IUsersGridRowData {
 }
 
 export interface IUsersGridState {
-  rowData: IUsersGridRowData[] | null;
+  rowData: IUsersGridRowData[] | [];
+  btnEditIsActive: boolean;
+  showModal: boolean;
+  selectedRowData: null | IUsersGridRowData;
+  modalType: 'user' | 'emptyUser';
+}
+
+export interface IUsersGridMemo {
+  columnDefs: ColDef[],
+  rowData:  IUsersGridRowData[],
+  btnEditActive: (isActive: boolean, selectedRowData: IUsersGridRowData) => void
 }
