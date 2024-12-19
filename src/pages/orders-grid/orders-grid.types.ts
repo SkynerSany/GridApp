@@ -1,11 +1,11 @@
-import {IProductsGridState} from "../products-grid/products-grid.types";
+import {IProductsGridRowData} from "../products-grid/products-grid.types";
 
-interface IOrderProduct {
+export interface IOrderProduct {
   productId: string;
   quantity: number;
 }
 
-interface IOrdersGridRowData {
+export interface IOrdersGridRowData {
   orderId: string;
   userId: number;
   products: IOrderProduct[];
@@ -16,11 +16,5 @@ interface IOrdersGridRowData {
 export interface IOrdersGridState {
   rowData: IOrdersGridRowData[] | null;
   showModal: boolean;
-  productsData: [] | IProductsGridState[];
-}
-
-export interface IModalOrders {
-  show: boolean,
-  handleClose: () => void,
-  productsData: [] | IProductsGridState[]
+  productsData: [] | IProductsGridRowData[];
 }

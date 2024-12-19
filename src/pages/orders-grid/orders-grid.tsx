@@ -1,94 +1,53 @@
-import {Component} from 'react';
+import {Component, memo} from 'react';
 import {AgGridReact} from 'ag-grid-react';
 import {ColDef, ICellRendererParams} from 'ag-grid-community';
-import {IModalOrders, IOrdersGridState} from "./orders-grid.types";
-import {Button, Modal} from "react-bootstrap";
+import {IOrderProduct, IOrdersGridRowData, IOrdersGridState} from "./orders-grid.types";
+import {Button} from "react-bootstrap";
+import ModalCustom from "../../widgets/modal/modal";
 
-class ModalGrid extends Component<IModalOrders> {
-  columnDefs: ColDef[] = [
-    {field: "productId", headerName: "Product ID", sortable: true, filter: true, flex: 1},
-    {field: "name", headerName: "Name", sortable: true, filter: true, flex: 1},
-    {field: "price", headerName: "Price", sortable: true, filter: true, flex: 1},
-    {field: "quantity", headerName: "Quantity", sortable: true, filter: true, flex: 1},
-  ];
+const GridMemo = memo(({columnDefs, rowData}: { columnDefs: ColDef[], rowData: IOrdersGridRowData[] }) => {
+  return <AgGridReact
+    columnDefs={columnDefs}
+    rowData={rowData}
+    pagination={true}
+    paginationPageSize={20}
+  />
+})
 
-  render() {
-    let {show, handleClose, productsData} = this.props;
-    console.log(productsData);
-
-    return (
-      <Modal
-        show={show}
-        onHide={handleClose}
-        size="xl"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Products</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{
-          <div className="ag-theme-alpine" style={{height: '400px', width: '100%'}}>
-            <AgGridReact
-              columnDefs={this.columnDefs}
-              rowData={productsData}
-              pagination={true}
-              paginationPageSize={20}
-            />
-          </div>
-        }</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    )
-  }
+async function getProductsData(productsList: IOrderProduct[]) {
+  return await Promise.all(
+    productsList.map(product =>
+      fetch(`http://localhost:5000/api/products/${product.productId}`)
+        .then(res => res.json())
+        .then(data => {
+          return {...data, quantity: product.quantity}
+        })
+    ))
 }
 
-class OrdersGrid extends Component<{}, IOrdersGridState> {
+export default class OrdersGrid extends Component<{}, IOrdersGridState> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      rowData: null,
+      rowData: [],
       showModal: false,
       productsData: []
     };
   }
 
   columnDefs: ColDef[] = [
-    {field: "orderId", headerName: "Order ID", sortable: true, filter: true, width: 120},
-    {field: "userId", headerName: "User ID", sortable: true, filter: true, width: 120},
-    {field: "total", headerName: "Total", sortable: true, filter: true, width: 120},
-    {field: "status", headerName: "Status", sortable: true, filter: true, width: 120},
-    {
-      field: "products",
-      headerName: "Products",
-      cellRenderer: this.CustomButtonComp.bind(this),
-      sortable: false,
-      filter: false,
-      autoHeight: true
-    },
+    {field: "orderId", headerName: "Order ID", sortable: true, filter: true},
+    {field: "userId", headerName: "User ID", sortable: true, filter: true},
+    {field: "total", headerName: "Total", sortable: true, filter: true},
+    {field: "status", headerName: "Status", sortable: true, filter: true},
+    {field: "products", headerName: "Products", cellRenderer: this.CustomButtonComp.bind(this), sortable: false, filter: false},
   ];
 
   CustomButtonComp(props: ICellRendererParams) {
-    async function getProductsData() {
-      return await Promise.all(
-        [...props.value].map(product =>
-          fetch(`http://localhost:5000/api/products/${product.productId}`)
-            .then(res => res.json())
-            .then(data => {
-              return {...data, quantity: product.quantity}
-            })
-        ))
-    }
-
     return <Button size="sm" onClick={() => {
-      getProductsData()
+      getProductsData(props.value)
         .then((productsData) => {
-          this.setState({productsData})
-          this.setState({showModal: true})
+          this.setState({productsData, showModal: true})
         })
     }}>Show products</Button>;
   }
@@ -104,24 +63,15 @@ class OrdersGrid extends Component<{}, IOrdersGridState> {
     return (
       <div className="ag-theme-alpine" style={{height: '100%', width: '100%'}}>
         {
-          this.state.rowData ? (
-            <AgGridReact
-              columnDefs={this.columnDefs}
-              rowData={this.state.rowData}
-              pagination={true}
-              paginationPageSize={20}
-            />
-          ) : (
-            <div>Загрузка данных...</div>
-          )}
-        <ModalGrid
+          this.state.rowData ? <GridMemo columnDefs={this.columnDefs} rowData={this.state.rowData}/> : <div>Загрузка данных...</div>
+        }
+        <ModalCustom
           show={this.state.showModal}
           handleClose={() => this.setState({showModal: false})}
-          productsData={this.state.productsData}
+          rowData={this.state.productsData}
+          type="products"
         />
       </div>
     );
   }
 }
-
-export default OrdersGrid;

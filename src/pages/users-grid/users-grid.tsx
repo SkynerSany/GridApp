@@ -13,16 +13,16 @@ class UsersGrid extends Component<{}, IUsersGridState> {
   }
 
   columnDefs: ColDef[] = [
-    {field: "id", headerName: "ID", sortable: true, filter: true},
-    {field: "name", headerName: "Name", sortable: true, filter: true, enableCellChangeFlash: true},
-    {field: "email", headerName: "Email", sortable: true, filter: true, enableCellChangeFlash: true},
-    {field: "role", headerName: "Role", sortable: true, filter: true, enableCellChangeFlash: true},
-    {field: "profileAge", headerName: "Age", sortable: true, filter: true},
-    {field: "profileAddressStreet", headerName: "Street Address", sortable: true, filter: true},
-    {field: "profileAddressCity", headerName: "City", sortable: true, filter: true},
-    {field: "profileAddressZipcode", headerName: "Zipcode", sortable: true, filter: true},
-    {field: "profilePreferencesTheme", headerName: "Theme", sortable: true, filter: true},
-    {field: "profilePreferencesNotifications", headerName: "Notifications", sortable: true, filter: true, type: "booleanColumn"},
+    {field: "id", headerName: "ID", sortable: true, filter: true, flex: 1},
+    {field: "name", headerName: "Name", sortable: true, filter: true, enableCellChangeFlash: true, flex: 2},
+    {field: "email", headerName: "Email", sortable: true, filter: true, enableCellChangeFlash: true, flex: 3},
+    {field: "role", headerName: "Role", sortable: true, filter: true, enableCellChangeFlash: true, flex: 2},
+    {field: "profileAge", headerName: "Age", sortable: true, filter: true, flex: 1},
+    {field: "profileAddressStreet", headerName: "Street Address", sortable: true, filter: true, flex: 2},
+    {field: "profileAddressCity", headerName: "City", sortable: true, filter: true, flex: 2},
+    {field: "profileAddressZipcode", headerName: "Zipcode", sortable: true, filter: true, flex: 1},
+    {field: "profilePreferencesTheme", headerName: "Theme", sortable: true, filter: true, flex: 1},
+    {field: "profilePreferencesNotifications", headerName: "Notifications", sortable: true, filter: true, type: "booleanColumn", editable: true, flex: 1},
   ];
 
   componentDidMount() {
