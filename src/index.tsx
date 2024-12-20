@@ -4,8 +4,10 @@ import './index.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import { BrowserRouter } from "react-router";
+import {BrowserRouter} from "react-router";
 import Layout from "./app/layout/Layout";
+import {Provider} from "react-redux";
+import store from "./app/redux/store";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -13,8 +15,12 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-      <BrowserRouter>
+
+    <BrowserRouter>
+      <Provider store={store}>
         <Layout/>
-      </BrowserRouter>
+      </Provider>
+    </BrowserRouter>
+
   </React.StrictMode>
 );

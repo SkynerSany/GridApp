@@ -96,7 +96,6 @@ class UsersGrid extends Component<{}, IUsersGridState> {
   }
 
   render() {
-
     return (
       <>
         <div className="ag-theme-alpine" style={{height: '80%', width: '100%'}}>
